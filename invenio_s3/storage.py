@@ -153,7 +153,8 @@ class S3FSFileStorage(PyFSFileStorage):
         as_attachment=False,
     ):
         """Send the file to the client."""
-        try:
+        if self.fileurl.startswith('s3://'):
+         try:
             fs, path = self._get_fs()
             s3_url_builder = partial(
                 fs.url, path, expires=current_app.config['S3_URL_EXPIRATION']
@@ -167,8 +168,10 @@ class S3FSFileStorage(PyFSFileStorage):
                 trusted=trusted,
                 as_attachment=as_attachment,
             )
-        except Exception as e:
-            raise StorageError('Could not send file: {}'.format(e))
+         except Exception as e:
+            raise StorageError('Could not here send file: {}'.format(fs.url))
+        else:
+            return super(S3FSFileStorage, self).send_file(filename,None,True,None,False,None,False)
 
     @set_blocksize
     def copy(self, src, *args, **kwargs):
